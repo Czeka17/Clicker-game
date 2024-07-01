@@ -19,7 +19,7 @@ function App() {
   })));
   function BuyUpgrade(upgradeId: number) {
     const selectedUpgrade = upgrades.find(upgrade => upgrade.id === upgradeId);
-    if (selectedUpgrade && count >= (selectedUpgrade.currentPrice * numberOfUpgradesToBuy + (10 * numberOfUpgradesToBuy) + numberOfUpgradesToBuy)) {
+    if (selectedUpgrade && numberOfUpgradesToBuy > 1 && count >= (selectedUpgrade.currentPrice * numberOfUpgradesToBuy + (10 * numberOfUpgradesToBuy) + numberOfUpgradesToBuy)) {
       setCount(prevCount => prevCount - (selectedUpgrade.currentPrice * numberOfUpgradesToBuy + (10 * numberOfUpgradesToBuy) + numberOfUpgradesToBuy));
       setClicksPerSecond(prevClicks => prevClicks + selectedUpgrade.multiplier * numberOfUpgradesToBuy);
 
@@ -29,6 +29,17 @@ function App() {
           currentPrice: upgrade.currentPrice * numberOfUpgradesToBuy + 10 * numberOfUpgradesToBuy + numberOfUpgradesToBuy
         } : upgrade
       ));
+    }else if(selectedUpgrade && numberOfUpgradesToBuy === 1 && count >= selectedUpgrade.currentPrice) {
+      setCount(prevCount => prevCount - selectedUpgrade.currentPrice);
+      setClicksPerSecond(prevClicks => prevClicks + selectedUpgrade.multiplier);
+
+      setUpgrades(prevUpgrades => prevUpgrades.map(upgrade =>
+        upgrade.id === upgradeId ? {
+          ...upgrade,
+          currentPrice: upgrade.currentPrice + 10 + numberOfUpgradesToBuy
+        } : upgrade
+      ));
+
     }
   }
 
