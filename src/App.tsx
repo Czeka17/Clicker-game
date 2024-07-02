@@ -1,27 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import LeftTab from './components/left-tab';
+import Farm from './components/farm';
+import Egg from './components/egg';
 
 const upgradesData = [
-  { id: 1, name: 'Kuot', basePrice: 10, multiplier: 1 },
-  { id: 2, name: 'Kuot', basePrice: 20, multiplier: 2 },
-  { id: 3, name: 'Kuot', basePrice: 50, multiplier: 3 },
-  { id: 4, name: 'Kuot', basePrice: 100, multiplier: 5 },
-  { id: 5, name: 'Kuot', basePrice: 1000, multiplier: 5 }
+  { id: 1, name: 'Chicken', basePrice: 10, multiplier: 1,type:'Eggs', bought:0 },
+  { id: 2, name: 'Black Chicken', basePrice: 20, multiplier: 2 ,type:'eggs'},
+  { id: 3, name: 'Green Chicken', basePrice: 50, multiplier: 3,type:'eggs' },
+  { id: 4, name: 'Blue Chicken', basePrice: 100, multiplier: 5,type:'eggs' },
+  { id: 5, name: 'Gold Chicken', basePrice: 1000, multiplier: 5,type:'eggs' }
 ];
+
 function App() {
-  const [count,setCount] = useState<number>(0)
-  const [clicksPerSecond,setClicksPerSecond] = useState<number>(0)
+  const [boughtUpgrades,setBoughtUpgrades] = useState<number>(0)
   const [numberOfUpgradesToBuy,setNumberOfUpgradesToBuy] = useState<number>(1)
+  const [eggs, setEggs] = useState<number>(0);
+  const [eggsPerSecond,setEggsPerSecond] = useState<number>(0)
+  const [eggsPerClick, setEggsPerClick] = useState<number>(1)
   const [upgrades, setUpgrades] = useState(upgradesData.map(upgrade => ({
     ...upgrade,
     currentPrice: upgrade.basePrice
   })));
   function BuyUpgrade(upgradeId: number) {
     const selectedUpgrade = upgrades.find(upgrade => upgrade.id === upgradeId);
-    if (selectedUpgrade && numberOfUpgradesToBuy > 1 && count >= (selectedUpgrade.currentPrice * numberOfUpgradesToBuy + (10 * numberOfUpgradesToBuy) + numberOfUpgradesToBuy)) {
-      setCount(prevCount => prevCount - (selectedUpgrade.currentPrice * numberOfUpgradesToBuy + (10 * numberOfUpgradesToBuy) + numberOfUpgradesToBuy));
-      setClicksPerSecond(prevClicks => prevClicks + selectedUpgrade.multiplier * numberOfUpgradesToBuy);
+    if (selectedUpgrade && numberOfUpgradesToBuy > 1 && eggs >= (selectedUpgrade.currentPrice * numberOfUpgradesToBuy + (10 * numberOfUpgradesToBuy) + numberOfUpgradesToBuy)) {
+      setEggs(prevEggs => prevEggs - (selectedUpgrade.currentPrice * numberOfUpgradesToBuy + (10 * numberOfUpgradesToBuy) + numberOfUpgradesToBuy));
+      setEggsPerSecond(prevEggs => prevEggs + selectedUpgrade.multiplier * numberOfUpgradesToBuy);
+
+      setBoughtUpgrades((prevBoughtUpgrades) => prevBoughtUpgrades + numberOfUpgradesToBuy)
+      
+      
 
       setUpgrades(prevUpgrades => prevUpgrades.map(upgrade =>
         upgrade.id === upgradeId ? {
@@ -29,10 +39,11 @@ function App() {
           currentPrice: upgrade.currentPrice * numberOfUpgradesToBuy + 10 * numberOfUpgradesToBuy + numberOfUpgradesToBuy
         } : upgrade
       ));
-    }else if(selectedUpgrade && numberOfUpgradesToBuy === 1 && count >= selectedUpgrade.currentPrice) {
-      setCount(prevCount => prevCount - selectedUpgrade.currentPrice);
-      setClicksPerSecond(prevClicks => prevClicks + selectedUpgrade.multiplier);
+    }else if(selectedUpgrade && numberOfUpgradesToBuy === 1 && eggs >= selectedUpgrade.currentPrice) {
+      setEggs(prevEggs => prevEggs - selectedUpgrade.currentPrice);
+      setEggsPerSecond(prevClicks => prevClicks + selectedUpgrade.multiplier);
 
+      setBoughtUpgrades((prevBoughtUpgrades) => prevBoughtUpgrades + numberOfUpgradesToBuy)
       setUpgrades(prevUpgrades => prevUpgrades.map(upgrade =>
         upgrade.id === upgradeId ? {
           ...upgrade,
@@ -43,6 +54,10 @@ function App() {
     }
   }
 
+  function GetEgg(){
+    setEggs((prevEggs) => prevEggs + eggsPerClick)
+  }
+
   useEffect(() => {
     let animationFrame: number;
     let lastTime = performance.now();
@@ -50,27 +65,59 @@ function App() {
     const updatePoints = (currentTime: number) => {
       const deltaTime = (currentTime - lastTime) / 1000;
       lastTime = currentTime;
-      setCount((prevCount) => prevCount + clicksPerSecond * deltaTime);
+      setEggs((prevEggs) => prevEggs + eggsPerSecond * deltaTime);
       animationFrame = requestAnimationFrame(updatePoints);
     };
+
 
     animationFrame = requestAnimationFrame(updatePoints);
 
     return () => cancelAnimationFrame(animationFrame);
-  }, [clicksPerSecond]);
+  }, [eggsPerSecond]);
+  
+  
 
   function Gamble() {
-    setCount((prevCount) => (Math.random() < 0.5 ? prevCount * 2 : 0));
+    setEggs((prevEggs) => (Math.random() < 0.5 ? prevEggs * 2 : 0));
   }
   return (
     <div className="App">
-     <div>
-      <ul>
+      <LeftTab/>
+      <div className='farm'>
+      <Farm GetEgg={GetEgg} boughtUpgrades={boughtUpgrades}/>
+      </div>
+    
+     <div className='tab'>
+    <div className='magazine'>
+    <div>
+    <Egg width={2*32}/>
+     <p>eggs:{eggs.toFixed(0)}</p>
+    </div>
+    <div>
+    <Egg width={2*32}/>
+
+    </div>
+    <div>
+    <Egg width={2*32}/>
+    </div>
+    </div>
+     
+      <ul className='number'>
         <li><button onClick={() => setNumberOfUpgradesToBuy(1)}>1</button></li>
         <li><button onClick={() => setNumberOfUpgradesToBuy(10)}>10</button></li>
         <li><button onClick={() => setNumberOfUpgradesToBuy(100)}>100</button></li>
+        <li><button onClick={() => setEggs((prevEggs) => prevEggs + 1)}>click</button></li>
+        
       </ul>
-      <ul>
+      <ul className='addons'>
+        <li onClick={() => setEggsPerClick(2)}>x2</li>
+        <li onClick={() => setEggsPerSecond((prevEggs) => prevEggs * 2)}>ex2</li>
+        <li>1</li>
+        <li>1</li>
+        <li>1</li>
+        <li>1</li>
+      </ul>
+      <ul className='upgrades'>
           {upgrades.map(upgrade => (
             <li key={upgrade.id}>
               <p>{upgrade.name}</p>
@@ -82,10 +129,7 @@ function App() {
           <li><button onClick={() => Gamble()}>GAMBLE</button></li>
         </ul>
      </div>
-     <div>
-        <div><p>{count.toFixed(0)}</p><p>{clicksPerSecond}</p></div>
-        <button onClick={() => setCount((prevCount) => prevCount + 1)}>CLICK</button>
-     </div>
+     
     </div>
   );
 }

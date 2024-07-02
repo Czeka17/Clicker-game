@@ -1,0 +1,27 @@
+.left{
+    width: 15%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+.left ul{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    list-style: none;
+    text-align: center;
+    width: 100%;
+}
+.left ul li{
+    text-align: center;
+    background-color: transparent;
+    color: white;
+    border: 1px solid white;
+    width: 80%;
+    margin: 1em;
+    padding: 1em 2em;
+    border-radius: 10px;
+}
